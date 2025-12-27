@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Task and Deadline Tracker</title>
+    <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 85%;
+            margin: 30px auto;
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 6px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 15px;
+            font-size: 14px;
+            background-color: #2c7be5;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1a5dcc;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th, td {
+            border: 1px solid #999;
+            padding: 10px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #eeeeee;
+        }
+
+        .completed {
+            background-color: #d4edda;
+        }
+
+        .overdue {
+            background-color: #f8d7da;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Student Task and Deadline Tracker</h1>
+
+    <label>Task Name</label>
+    <input type="text" id="taskName">
+
+    <label>Subject Name</label>
+    <input type="text" id="subjectName">
+
+    <label>Deadline</label>
+    <input type="date" id="deadlineDate">
+
+    <button onclick="addTask()">Add Task</button>
+
+    <table>
+        <tr>
+            <th>Task</th>
+            <th>Subject</th>
+            <th>Deadline</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        <tbody id="taskList"></tbody>
+    </table>
+</div>
+
+<script>
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    function addTask() {
+        let task = document.getElementById("taskName").value;
+        let subject = document.getElementById("subjectName").value;
+        let deadline = document.getElementById("deadlineDate").value;
+
+        if (task === "" || subject === "" || deadline === "") {
+            alert("Please fill all fields");
+            return;
+        }
+
+        tasks.push({
+            task: task,
+            subject: subject,
+            deadline: deadline,
+            completed: false
+        });
+
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        clearInputs();
+        displayTasks();
+    }
+
+    function displayTasks() {
+        let table = document.getElementById("taskList");
+        table.innerHTML = "";
+        let today = new Date().toISOString().split("T")[0];
+
+        tasks.forEach((item, index) => {
+            let row = document.createElement("tr");
+
+            if (item.completed) {
+                row.className = "completed";
+            } else if (item.deadline < today) {
+                row.className = "overdue";
+            }
+
+            row.innerHTML = `
+                <td>${item.task}</td>
+                <td>${item.subject}</td>
+                <td>${item.deadline}</td>
+                <td>${item.completed ? "Completed" : "Pending"}</td>
+                <td>
+                    <button onclick="completeTask(${index})">Complete</button>
+                    <button onclick="deleteTask(${index})">Delete</button>
+                </td>
+            `;
+            table.appendChild(row);
+        });
+    }
+
+    function completeTask(index) {
+        tasks[index].completed = true;
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        displayTasks();
+    }
+
+    function deleteTask(index) {
+        tasks.splice(index, 1);
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        displayTasks();
+    }
+
+    function clearInputs() {
+        document.getElementById("taskName").value = "";
+        document.getElementById("subjectName").value = "";
+        document.getElementById("deadlineDate").value = "";
+    }
+
+    displayTasks();
+</script>
+
+</body>
+<!-- Deadline enhancement: overdue tasks highlighting -->
+
+</html>
